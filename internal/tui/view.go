@@ -61,14 +61,32 @@ func (m Model) lvmView() string {
 			s += "No logical volumes found.\n"
 		}
 		for _, lv := range m.LogicalLVs {
-			s += fmt.Sprintf(
-				"• %-15s  VG:%-8s  %-6s  (%s)\n",
-				lv.Name,
-				lv.VG,
-				lv.Size,
-				lv.FS,
-			)
-		}
+			mp := lv.Mountpoint
+			if mp == "" {
+				mp = "-"
+			}
+		
+			fs := lv.FS
+			if fs == "" {
+				fs = "unknown"
+			}
+		
+			usage := lv.UsePercent
+			if usage == "" {
+				usage = "-"
+			}
+
+	s += fmt.Sprintf(
+		"• %-12s VG:%-6s %-5s %-8s %-4s %s\n",
+		lv.Name,
+		lv.VG,
+		lv.Size,
+		fs,
+		usage,
+		mp,
+	)
+}
+
 
 	case VGsTab:
 		if len(m.VolumeVGs) == 0 && !m.IsLoading {

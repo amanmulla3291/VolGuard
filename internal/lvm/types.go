@@ -16,5 +16,11 @@ type LogicalVolume struct {
 	Name string
 	VG   string
 	Size string
-	FS   string
+
+	FS         string
+	Mountpoint string
+	Used       string
+	Avail      string
+	UsePercent string
 }
+
