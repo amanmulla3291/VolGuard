@@ -1,9 +1,16 @@
 package tui
 
 import (
+	"github.com/charmbracelet/bubbles/spinner"
 	tea "github.com/charmbracelet/bubbletea"
+
+	"github.com/amanmulla3291/volguard/internal/config"
 	"github.com/amanmulla3291/volguard/internal/lvm"
 )
+
+/* =========================
+   SCREENS & TABS
+========================= */
 
 type Screen int
 type LVMTab int
@@ -20,11 +27,23 @@ const (
 	PVsTab
 )
 
+/* =========================
+   MODEL
+========================= */
+
 type Model struct {
+	// UI state
 	Screen Screen
 	Cursor int
 
 	Choices []string
+
+	// App context
+	Context   config.AppContext
+	IsLoading bool
+
+	// Spinner
+	Spinner spinner.Model
 
 	// LVM
 	LVMProvider lvm.Provider
@@ -37,11 +56,20 @@ type Model struct {
 	Error error
 }
 
-func NewModel(provider lvm.Provider) Model {
+/* =========================
+   CONSTRUCTOR
+========================= */
+
+func NewModel(ctx config.AppContext, provider lvm.Provider) Model {
+	sp := spinner.New()
+	sp.Spinner = spinner.Dot
+
 	return Model{
 		Screen:      MainMenu,
+		Context:     ctx,
 		LVMProvider: provider,
 		LVMTab:      LVsTab,
+		Spinner:     sp,
 		Choices: []string{
 			"LVM Manager",
 			"Backup & Restore",
@@ -49,6 +77,10 @@ func NewModel(provider lvm.Provider) Model {
 		},
 	}
 }
+
+/* =========================
+   INIT
+========================= */
 
 func (m Model) Init() tea.Cmd {
 	return nil

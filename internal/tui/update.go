@@ -1,25 +1,48 @@
 package tui
 
-import tea "github.com/charmbracelet/bubbletea"
+import (
+	"github.com/charmbracelet/bubbles/spinner"
+	tea "github.com/charmbracelet/bubbletea"
+)
 
 func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 	switch msg := msg.(type) {
 
+	/* =========================
+	   SPINNER TICK
+	========================= */
+
+	case spinner.TickMsg:
+		var cmd tea.Cmd
+		m.Spinner, cmd = m.Spinner.Update(msg)
+		return m, cmd
+
+	/* =========================
+	   DATA LOADED
+	========================= */
+
 	case lvsLoadedMsg:
+		m.IsLoading = false
 		m.LogicalLVs = msg.LVs
 		m.Error = msg.Err
 		return m, nil
 
 	case vgsLoadedMsg:
+		m.IsLoading = false
 		m.VolumeVGs = msg.VGs
 		m.Error = msg.Err
 		return m, nil
 
 	case pvsLoadedMsg:
+		m.IsLoading = false
 		m.PhysicalPVs = msg.PVs
 		m.Error = msg.Err
 		return m, nil
+
+	/* =========================
+	   KEYBOARD INPUT
+	========================= */
 
 	case tea.KeyMsg:
 		switch msg.String() {
@@ -72,14 +95,29 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	return m, nil
 }
 
+/* =========================
+   TAB LOADER
+========================= */
+
 func (m Model) loadCurrentTab() tea.Cmd {
+	m.IsLoading = true
+
 	switch m.LVMTab {
 	case LVsTab:
-		return loadLVsCmd(m.LVMProvider)
+		return tea.Batch(
+			m.Spinner.Tick,
+			loadLVsCmd(m.LVMProvider),
+		)
 	case VGsTab:
-		return loadVGsCmd(m.LVMProvider)
+		return tea.Batch(
+			m.Spinner.Tick,
+			loadVGsCmd(m.LVMProvider),
+		)
 	case PVsTab:
-		return loadPVsCmd(m.LVMProvider)
+		return tea.Batch(
+			m.Spinner.Tick,
+			loadPVsCmd(m.LVMProvider),
+		)
 	default:
 		return nil
 	}
