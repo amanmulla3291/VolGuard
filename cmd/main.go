@@ -4,11 +4,14 @@ import (
 	"log"
 
 	tea "github.com/charmbracelet/bubbletea"
+	"github.com/amanmulla3291/volguard/internal/lvm"
 	"github.com/amanmulla3291/volguard/internal/tui"
 )
 
 func main() {
-	p := tea.NewProgram(tui.NewModel())
+	provider := &lvm.MockProvider{}
+
+	p := tea.NewProgram(tui.NewModel(provider))
 	if err := p.Start(); err != nil {
 		log.Fatal(err)
 	}

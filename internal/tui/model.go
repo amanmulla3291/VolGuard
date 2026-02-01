@@ -1,24 +1,35 @@
 package tui
 
-import tea "github.com/charmbracelet/bubbletea"
+import (
+	"github.com/charmbracelet/bubbletea"
+	"github.com/amanmulla3291/volguard/internal/lvm"
+)
 
 type Screen int
 
 const (
 	MainMenu Screen = iota
-	LVMMenu
-	BackupMenu
+	LVMScreen
+	BackupScreen
 )
 
 type Model struct {
-	Screen  Screen
-	Cursor  int
+	Screen Screen
+	Cursor int
+
+	// Main menu
 	Choices []string
+
+	// LVM
+	LVMProvider lvm.Provider
+	LogicalLVs  []lvm.LogicalVolume
+	Error       error
 }
 
-func NewModel() Model {
+func NewModel(provider lvm.Provider) Model {
 	return Model{
-		Screen: MainMenu,
+		Screen:      MainMenu,
+		LVMProvider: provider,
 		Choices: []string{
 			"LVM Manager",
 			"Backup & Restore",
