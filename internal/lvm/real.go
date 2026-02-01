@@ -52,6 +52,7 @@ func (r *RealProvider) ListLVs(ctx context.Context) ([]LogicalVolume, error) {
 		return nil, errors.New("failed to parse lvs JSON output")
 	}
 
+	// STEP 1: build LV slice
 	var lvs []LogicalVolume
 	for _, rep := range report.Report {
 		for _, lv := range rep.LV {
@@ -63,6 +64,12 @@ func (r *RealProvider) ListLVs(ctx context.Context) ([]LogicalVolume, error) {
 			})
 		}
 	}
+
+	// STEP 2: best-effort enrichment (read-only)
+	blocks, _ := system.ListBlockDevices(ctx, r.Exec)
+	usage, _ := system.ListFSUsage(ctx, r.Exec)
+
+	lvs = EnrichLVs(lvs, blocks, usage)
 
 	return lvs, nil
 }
